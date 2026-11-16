@@ -31,9 +31,29 @@ jobs:
       - name: 執行測試
         run: pytest -v
 
+  security-scan:
+    name: 安全掃描
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取得程式碼
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: 安裝 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安裝 Bandit
+        run: pip install bandit==1.7.10
+
+      - name: 掃描程式碼漏洞（中等以上就失敗）
+        run: bandit -r . -ll -x ./.venv
+
   docker-build:
     name: 打包容器
-    needs: test
+    needs: [test, security-scan]
     runs-on: ubuntu-latest
     steps:
       - name: 取得程式碼
