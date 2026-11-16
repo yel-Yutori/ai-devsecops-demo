@@ -63,3 +63,31 @@ jobs:
 
       - name: 建立 Docker 映像檔
         run: docker build -t demo-app .
+
+  publish:
+    name: 發布映像檔
+    needs: [test, security-scan, docker-build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: 取得程式碼
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # 與上方相同
+        with:
+          persist-credentials: false
+
+      - name: 登入 GitHub Container Registry
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: 建立並推送映像檔
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker build \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            -t "${IMAGE}:${GITHUB_SHA}" .
+          docker push "${IMAGE}:${GITHUB_SHA}"
+          echo "已發布：${IMAGE}:${GITHUB_SHA}"
