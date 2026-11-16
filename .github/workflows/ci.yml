@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# 最小權限：只允許讀取程式碼
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: 自動測試
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取得程式碼
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: 安裝 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 安裝套件
+        run: pip install -r requirements.txt
+
+      - name: 執行測試
+        run: pytest -v
+
+  docker-build:
+    name: 打包容器
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取得程式碼
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: 建立 Docker 映像檔
+        run: docker build -t demo-app .
