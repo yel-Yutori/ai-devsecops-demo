@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DevSecOps 示範網站</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>DevSecOps 示範網站</h1>
+    <p class="sub">這個頁面由自動化流水線負責測試、掃描與部署</p>
+
+    <div class="row">
+      <span>目前版本</span>
+      <span class="badge">{{ version }}</span>
+    </div>
+
+    {% if version == "dev" %}
+    <p class="note warn">這是本機開發版，尚未經過流水線</p>
+    {% else %}
+    <p class="note ok">這個版本已通過全部檢查才被部署</p>
+    <ul class="steps">
+      <li>自動測試</li>
+      <li>安全掃描</li>
+      <li>容器打包</li>
+      <li>映像檔發布</li>
+      <li>健康檢查</li>
+    </ul>
+    {% endif %}
+  </main>
+</body>
+</html>
