@@ -1,0 +1,27 @@
+import hashlib
+import ipaddress
+import os
+import sqlite3
+import subprocess
+
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+
+
+def find_user(name):
+    conn = sqlite3.connect("app.db")
+    return conn.execute(
+        "SELECT * FROM users WHERE name = ?", (name,)
+    ).fetchall()
+
+
+def hash_password(password, salt):
+    return hashlib.pbkdf2_hmac(
+        "sha256", password.encode(), salt, 600_000
+    ).hex()
+
+
+def ping_host(host):
+    ipaddress.ip_address(host)
+    return subprocess.run(
+        ["ping", "-c", "1", host], capture_output=True, check=False
+    )
