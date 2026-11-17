@@ -42,8 +42,9 @@ def test_safe_code_passes():
 
 
 def test_nosec_comment_cannot_bypass_scan():
-    code = "import subprocess\nsubprocess.run(f'ls {user_input}', shell=True)  # nosec\n"
-    assert post(code).get_json()["passed"] is False
+    base = "import subprocess\n\ndef run(cmd):\n    subprocess.run(cmd, shell=True)"
+    assert post(base).get_json()["passed"] is False
+    assert post(base + "  # nosec\n").get_json()["passed"] is False
 
 
 def test_syntax_error_is_rejected():
